@@ -9,4 +9,4 @@ if [[ ! -f ~/bin/lein ]]; then
     chmod 755 ~/bin/lein
 fi
 
-~/bin/lein $1
+~/bin/lein $@
