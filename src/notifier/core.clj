@@ -23,12 +23,12 @@
   (let [{:keys [status headers body error] :as resp} @(http/get "https://api.btcmarkets.net/market/BTC/AUD/tick")
         data (json/read-str body)
         last-price (data "lastPrice")]
-    (println "retrieved btc price:" status ", error:" error ", price:" last-price)
+    (println "retrieved btc status:" status ", error:" error ", price:" last-price)
     (if error (println "failed with " error)
         last-price)))
 
 (defn publish-event [level price percent]
-  (let[url (str "https://maker.ifttt.com/trigger/BTC-AUD-%s/with/key/%" level @ifttt-key)
+  (let[url (format  "https://maker.ifttt.com/trigger/BTC-AUD-%s/with/key/%s" level @ifttt-key)
        {:keys[status body]} (http/post url {:headers {"Content-Type:" "application/json"}
                                             :body (json/write-str {:value1 price :value2 percent})})]
     (println "published event:" url " result:" status ":" body)))
