@@ -9,6 +9,8 @@
             [org.httpkit.client :as http])
   (:gen-class))
 
+;; ASX-ordinaries http://www.marketindex.com.au/all-ordinaries
+
 (def ifttt-key (delay (System/getProperty "ifttt-key")))
 
 (defn sign-req [uri key body]
