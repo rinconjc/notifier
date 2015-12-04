@@ -55,7 +55,7 @@
     data))
 
 (defn mk-price-nofifier [changes file]
-  (let[last-prices (persistent-atom file)]
+  (let[last-prices (persistent-atom file {})]
     (fn[]
       (if-let [price (get-btc-price)]
         (doseq [c changes :let [last-price (@last-prices c)]]
