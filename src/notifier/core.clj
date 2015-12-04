@@ -49,7 +49,7 @@
                     (catch Exception e
                       (println "failed reading file " file ":" e)
                       initial)))]
-    (add-watch data
+    (add-watch data :key
                (fn[k r o n]
                  (spit file (pr-str n))))
     data))
