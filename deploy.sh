@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 sleep 5
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
