@@ -2,6 +2,6 @@
   (:require [clojure.test :refer :all]
             [notifier.core :refer :all]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(deftest publish-test
+  (testing "testing publishing an event"
+    (is (= 200 (publish-event 10 500.0 2.0)))))

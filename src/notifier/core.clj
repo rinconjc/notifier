@@ -29,11 +29,16 @@
     (if error (println "failed with " error)
         last-price)))
 
+(defn get-asx-prices []
+  )
+
 (defn publish-event [level price percent]
   (let[url (format  "https://maker.ifttt.com/trigger/BTC-AUD-%s/with/key/%s" level @ifttt-key)
-       {:keys[status body]} (http/post url {:headers {"Content-Type:" "application/json"}
-                                            :body (json/write-str {:value1 price :value2 percent})})]
-    (println "published event:" url " result:" status ":" body)))
+       {:keys[status body]} @(http/post url {:headers {"Content-Type:" "application/json"}
+                                            :body (json/write-str {:value1 (str price)
+                                                                   :value2 (str percent)})})]
+    (println "published event:" url " result:" status ":" body)
+    status))
 
 (defn mk-price-nofifier [changes]
   (let[last-prices (atom {})]
@@ -42,12 +47,12 @@
         (doseq [c changes :let [last-price (@last-prices c)]]
           (if-let [change (and last-price (- price last-price))]
             (when (>= (Math/abs change) c)
-              (publish-event c price (/ change last-price))
+              (publish-event c price (-> change (* 100) (/ last-price)))
               (swap! last-prices assoc c price))
             (swap! last-prices assoc c price)))))))
 
 (defn schedule []
-  (let [notifier (mk-price-nofifier [10 20 30 40 50 100])
+  (let [notifier (mk-price-nofifier [5 10 20 30 40 50 100])
         times (periodic-seq (t/now) (-> 2 t/minutes))]
     (chime-at times (fn[time]
                       (println "chiming at " time)
