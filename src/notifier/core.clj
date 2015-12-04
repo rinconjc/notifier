@@ -35,11 +35,12 @@
 (defn get-asx-prices []
   )
 
-(defn publish-event [level price percent]
-  (let[url (format  "https://maker.ifttt.com/trigger/BTC-AUD-%s/with/key/%s" level @ifttt-key)
+(defn publish-event [event & value]
+  (let[url (format  "https://maker.ifttt.com/trigger/%s/with/key/%s" event @ifttt-key)
+       body (into {} (for [i (range (count value))]
+                       [(->> i inc (str "value") keyword) value]))
        {:keys[status body]} @(http/post url {:headers {"Content-Type" "application/json"}
-                                            :body (json/write-str {:value1 (str price)
-                                                                   :value2 (str percent)})})]
+                                             :body (and value (json/write-str body))})]
     (println "published event:" url " result:" status ":" body)
     status))
 
@@ -61,7 +62,8 @@
         (doseq [c changes :let [last-price (@last-prices c)]]
           (if-let [change (and last-price (- price last-price))]
             (when (>= (Math/abs change) c)
-              (publish-event c price (-> change (* 100) (/ last-price)))
+              (publish-event (str "BTC-AUD-" c) (str price)
+                             (format "%+.1f%%" (-> change (* 100) (/ last-price))))
               (swap! last-prices assoc c price))
             (swap! last-prices assoc c price)))))))
 
