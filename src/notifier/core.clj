@@ -35,12 +35,12 @@
 (defn get-asx-prices []
   )
 
-(defn publish-event [event & value]
+(defn publish-event [event & values]
   (let[url (format  "https://maker.ifttt.com/trigger/%s/with/key/%s" event @ifttt-key)
-       body (into {} (for [i (range (count value))]
-                       [(->> i inc (str "value") keyword) value]))
+       body (into {} (map-indexed
+                      (fn[i v] [(->> i inc (str "value") keyword) v]) values))
        {:keys[status body]} @(http/post url {:headers {"Content-Type" "application/json"}
-                                             :body (and value (json/write-str body))})]
+                                             :body (and values (json/write-str body))})]
     (println "published event:" url " result:" status ":" body)
     status))
 
