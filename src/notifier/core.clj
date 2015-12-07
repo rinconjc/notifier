@@ -8,7 +8,8 @@
             [clojure.edn :as edn]
             [net.cgrand.enlive-html :as html]
             [org.httpkit.client :as http])
-  (:import java.net.URL
+  (:import [java.io FileReader PushbackReader]
+           java.net.URL
            java.text.DecimalFormat
            java.util.Base64
            javax.crypto.Mac
