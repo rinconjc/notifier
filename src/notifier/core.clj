@@ -40,8 +40,8 @@
                  (html/select [:#asx_sp_table :tbody :tr]))
         price-fmt (DecimalFormat. "$#.0#")]
     (for [row rows :let[cols (-> row (html/select [:td]))
-                        code (:content (second cols))
-                        price (.parse price-fmt (-> cols (nth 3) :content))]]
+                        code (html/text (second cols))
+                        price (.parse price-fmt (-> cols (nth 3) html/text))]]
       [code price])))
 
 (defn publish-event [event & values]
@@ -77,12 +77,28 @@
               (swap! last-prices assoc c price))
             (swap! last-prices assoc c price)))))))
 
+(defn mk-asx-price-notifier [percents file]
+  (let [asx-prices (persistent-atom file {})]
+    (fn[]
+      (if-let[new-prices (get-asx-prices)]
+        (doseq [[stock price] new-prices :let[event-prices (@asx-prices stock {})]]
+          (doseq [[pct prev-price] event-prices
+                  :let [change (-> (- price prev-price) (/ prev-price) (* 100))]]
+            (when (>= (Math/abs change) pct)
+              (publish-event (str "ASX-" stock "-" pct) (str price)
+                             (format "%+.1f%%" change))
+              (swap! asx-prices assoc stock (assoc event-prices pct price))))
+          (if (empty? event-prices)
+            (swap! asx-prices assoc stock (into {} (for [l percents] [l price])))))))))
+
 (defn schedule []
-  (let [notifier (mk-price-nofifier [5 10 20 30 40 50 100] "btc-prices.edn")
+  (let [btc-notifier (mk-price-nofifier [5 10 20 30 40 50 100] "btc-prices.edn")
+        asx-notifier (mk-asx-price-notifier [1 2 3 5 8 13] "asx-prices.edn")
         times (periodic-seq (t/now) (-> 2 t/minutes))]
     (chime-at times (fn[time]
                       (println "chiming at " time)
-                      (notifier)))))
+                      (btc-notifier)
+                      (asx-notifier)))))
 
 (defn -main
   "Starting notifier..."
