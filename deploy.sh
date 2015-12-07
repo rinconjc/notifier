@@ -6,6 +6,6 @@ git pull
 
 pkill -f lein
 ifttt=$(cat .key)
-env JVM_OPTS="-Difttt-key=$ifttt" ./build.sh run > ./run.log &
+env JVM_OPTS="-Difttt-key=$ifttt" ./build.sh run > ./run.log 2>&1 &
 
 echo "deployed!"

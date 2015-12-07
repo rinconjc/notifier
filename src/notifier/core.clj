@@ -8,9 +8,11 @@
             [clojure.edn :as edn]
             [net.cgrand.enlive-html :as html]
             [org.httpkit.client :as http])
-
   (:import java.net.URL
-           java.text.DecimalFormat))
+           java.text.DecimalFormat
+           java.util.Base64
+           javax.crypto.Mac
+           javax.crypto.spec.SecretKeySpec))
 
 ;; ASX-ordinaries http://www.marketindex.com.au/all-ordinaries
 
