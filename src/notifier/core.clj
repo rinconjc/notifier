@@ -90,7 +90,7 @@
             (publish-event (str "ASX-" stock "-" pct) (str price)
                            (format "%+.1f%%" change)))
           (if-not (empty? changes)
-            (swap! asx-prices assoc stock (apply assoc event-prices (for[[pct _] changes] [pct price]))))
+            (swap! asx-prices assoc stock (reduce #(assoc %1 (first %2) price) event-prices  changes)))
           (if (empty? event-prices)
             (swap! asx-prices assoc stock (into {} (for [l percents] [l price])))))))))
 
