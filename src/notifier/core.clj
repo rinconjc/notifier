@@ -81,13 +81,16 @@
   (let [asx-prices (persistent-atom file {})]
     (fn[]
       (if-let[new-prices (get-asx-prices)]
-        (doseq [[stock price] new-prices :let[event-prices (@asx-prices stock {})]]
-          (doseq [[pct prev-price] event-prices
-                  :let [change (-> (- price prev-price) (/ prev-price) (* 100))]]
-            (when (>= (Math/abs change) pct)
-              (publish-event (str "ASX-" stock "-" pct) (str price)
-                             (format "%+.1f%%" change))
-              (swap! asx-prices assoc stock (assoc event-prices pct price))))
+        (doseq [[stock price] new-prices
+                :let[event-prices (@asx-prices stock {})
+                     changes (for [[pct prev-price] event-prices
+                                   :let [change (-> (- price prev-price) (/ prev-price) (* 100))]
+                                   :when #(>= (Math/abs change) pct)] [pct change])]]
+          (doseq [[pct change] changes]
+            (publish-event (str "ASX-" stock "-" pct) (str price)
+                           (format "%+.1f%%" change)))
+          (if-not (empty? changes)
+            (swap! asx-prices assoc stock (apply assoc event-prices (for[[pct _] changes] [pct price]))))
           (if (empty? event-prices)
             (swap! asx-prices assoc stock (into {} (for [l percents] [l price])))))))))
 
