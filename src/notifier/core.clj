@@ -84,7 +84,7 @@
         (doseq [[stock price] new-prices
                 :let[event-prices (@asx-prices stock {})
                      changes (for [[pct prev-price] event-prices
-                                   :let [change (-> (- price prev-price) (/ prev-price) (* 100))]
+                                   :let [change (-> (- price prev-price) (/ prev-price) (* 100.0))]
                                    :when #(>= (Math/abs change) pct)] [pct change])]]
           (doseq [[pct change] changes]
             (publish-event (str "ASX-" stock "-" pct) (str price)
