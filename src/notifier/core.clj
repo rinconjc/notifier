@@ -6,11 +6,11 @@
              [periodic :refer [periodic-seq]]]
             [clojure.data.json :as json]
             [clojure.edn :as edn]
+            [net.cgrand.enlive-html :as html]
             [org.httpkit.client :as http])
-  (:import [java.io FileReader PushbackReader]
-           java.util.Base64
-           javax.crypto.Mac
-           javax.crypto.spec.SecretKeySpec))
+
+  (:import java.net.URL
+           java.text.DecimalFormat))
 
 ;; ASX-ordinaries http://www.marketindex.com.au/all-ordinaries
 
@@ -33,7 +33,13 @@
         last-price)))
 
 (defn get-asx-prices []
-  )
+  (let [rows (-> "http://www.marketindex.com.au/all-ordinaries" URL. html/html-resource
+                 (html/select [:#asx_sp_table :tbody :tr]))
+        price-fmt (DecimalFormat. "$#.0#")]
+    (for [row rows :let[cols (-> row (html/select [:td]))
+                        code (:content (second cols))
+                        price (.parse price-fmt (-> cols (nth 3) :content))]]
+      [code price])))
 
 (defn publish-event [event & values]
   (let[url (format  "https://maker.ifttt.com/trigger/%s/with/key/%s" event @ifttt-key)
@@ -63,7 +69,8 @@
           (if-let [change (and last-price (- price last-price))]
             (when (>= (Math/abs change) c)
               (publish-event (str "BTC-AUD-" c) (str price)
-                             (format "%+.1f%%" (-> change (* 100) (/ last-price))))
+                             (format "%+.1f%%" (-> change (* 100) (/ last-price)))
+                             (format "%+.1f" change))
               (swap! last-prices assoc c price))
             (swap! last-prices assoc c price)))))))
 
