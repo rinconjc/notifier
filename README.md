@@ -1,20 +1,17 @@
 # notifier
 
-FIXME: description
+This aims to be a collection of notifiers or sensors that detect interesting events and publish them to IFTTT. At the moment only it only detects price changes of bitcoins in btcmarkets.net and ASX listed stocks.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+   env JVM_OPTS="-Difttt-key=<your ifttt api key>" ./build.sh run
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar notifier-0.1.0-standalone.jar [args]
+    $ env JVM_OPTS="-Difttt-key=<your ifttt api key>" ./build.sh run
 
 ## Options
 
-FIXME: listing of options this app accepts.
 
 ## Examples
 
